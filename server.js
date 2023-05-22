@@ -2,15 +2,19 @@ const url = "https://store.steampowered.com/steamdeck";
 
 console.log("Starting... (this can take a little while)");
 const { JSDOM } = require("jsdom");
-const jsdom = new JSDOM('', { runScripts: "dangerously", resources: "usable", url });
-const { window } = jsdom;
+
+const jsdom = new JSDOM('');
+const virtualConsole = jsdom.virtualConsole;
+virtualConsole.sendTo(console, { omitJSDOMErrors: false });
+const dom = new JSDOM(``, { virtualConsole, runScripts: "dangerously", resources: "usable", url, verbose: false });
+const { window } = dom;
 const { document } = window;
 
 require('dotenv').config();
 window.navigator.language = process.env.LANG || "en-US";
 
 const callbackUrl = process.env.CALLBACK_URL || undefined;
-if (!callbackUrl) {
+if (!callbackUrl || callbackUrl.length === 0) {
     console.warn("CALLBACK_URL is not defined! Please define it in .env file.");
 }
 
@@ -27,9 +31,9 @@ fetch(url).then(async res => {
     $(document).ready(() => {
         const oldConsoleLogs = disableLogs();
         $("body").html(text);
-        enableLogs(oldConsoleLogs);
         console.log("Site created!");
         setTimeout(() => {
+            enableLogs(oldConsoleLogs);
             getAvailableVersions($).then(() => {
                 process.exit(0);
             });
