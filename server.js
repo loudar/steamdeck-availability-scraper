@@ -24,10 +24,7 @@ fetch(url).then(async res => {
     console.log("Setting up virtual site...");
     const $ = require("jquery")(window);
     $(document).ready(() => {
-        const oldLog = console.log;
-        console.log = () => {};
         $("body").html(text);
-        console.log = oldLog;
         console.log("Site created!");
         setTimeout(() => {
             getAvailableVersions($);
